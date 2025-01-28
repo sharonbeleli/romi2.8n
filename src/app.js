@@ -14,7 +14,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function generateQuestions() {
         const questions = new Set();
-        while (questions.size < 10) {
+
+        // יצירת שאלות חיבור וחיסור
+        while (questions.size < 6) {
             const num1 = generateRandomNumber(22);
             const num2 = generateRandomNumber(22 - num1);
 
@@ -26,6 +28,26 @@ document.addEventListener("DOMContentLoaded", () => {
                 : `${num1} - ${num2}`;
 
             questions.add(JSON.stringify({ question: questionText, answer }));
+        }
+
+        // הוספת בעיות מילוליות
+        while (questions.size < 10) {
+            const type = Math.random() < 0.5 ? "apples" : "balls";
+            if (type === "apples") {
+                const numApples = generateRandomNumber(10) + 10;
+                const givenApples = generateRandomNumber(Math.min(10, numApples));
+                questions.add(JSON.stringify({
+                    question: `לדנה היו ${numApples} תפוחים. היא נתנה ${givenApples} לחברתה. כמה נשארו לה?`,
+                    answer: Math.abs(numApples - givenApples)
+                }));
+            } else {
+                const numBalls = generateRandomNumber(10) + 1;
+                const extraBalls = generateRandomNumber(10);
+                questions.add(JSON.stringify({
+                    question: `ליוסי יש ${numBalls} כדורים. חברו נתן לו ${extraBalls} נוספים. כמה יש לו עכשיו?`,
+                    answer: numBalls + extraBalls
+                }));
+            }
         }
 
         return Array.from(questions).map((q) => JSON.parse(q));
