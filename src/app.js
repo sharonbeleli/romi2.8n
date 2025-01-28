@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentQuestionIndex = 0;
     let score = 0;
     let attempts = 0;
+    const answers = [];
 
     const questions = generateQuestions();
     renderQuestion();
@@ -67,6 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 feedbackEl.textContent = "✔ תשובה נכונה! כל הכבוד!";
                 feedbackEl.style.color = "green";
                 score++;
+                answers.push({ question: currentQuestion.question, userAnswer, isCorrect: true });
                 attempts = 0;
                 setTimeout(() => {
                     currentQuestionIndex++;
@@ -77,8 +79,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 feedbackEl.style.color = "red";
                 attempts++;
                 if (attempts >= 2) {
+                    answers.push({ question: currentQuestion.question, userAnswer, isCorrect: false });
+                    attempts = 0;
                     setTimeout(() => {
-                        attempts = 0;
                         currentQuestionIndex++;
                         renderQuestion();
                     }, 1000);
@@ -101,11 +104,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         </tr>
                     </thead>
                     <tbody>
-                        ${questions.map((q, i) => `
+                        ${answers.map((ans) => `
                             <tr>
-                                <td>${q.question}</td>
-                                <td>${answers[i]?.userAnswer || "לא ענה"}</td>
-                                <td>${answers[i]?.isCorrect ? "✔" : "✖"}</td>
+                                <td>${ans.question}</td>
+                                <td>${ans.userAnswer}</td>
+                                <td>${ans.isCorrect ? "✔" : "✖"}</td>
                             </tr>
                         `).join("")}
                     </tbody>
@@ -119,6 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
             currentQuestionIndex = 0;
             score = 0;
             attempts = 0;
+            answers.length = 0;
             renderQuestion();
         });
     }
