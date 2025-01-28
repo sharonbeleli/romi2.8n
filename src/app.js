@@ -66,6 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="card">
                     <h2 class="question">${currentQuestion.question}</h2>
                     <input type="number" id="answer" class="input" placeholder="הקלד תשובה כאן">
+                     inputMode="numeric"
                     <button id="check-btn" class="btn">בדוק תשובה</button>
                     <p id="feedback" class="feedback"></p>
                 </div>
