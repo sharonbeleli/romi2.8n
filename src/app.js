@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const root = document.getElementById("root");
     let currentQuestionIndex = 0;
     let score = 0;
+    let attempts = 0;
 
     const questions = generateQuestions();
     renderQuestion();
@@ -13,23 +14,23 @@ document.addEventListener("DOMContentLoaded", () => {
     function generateQuestions() {
         const questions = [];
         for (let i = 0; i < 3; i++) {
-            let num1 = generateRandomNumber(25);
-            let num2 = generateRandomNumber(25);
+            let num1 = generateRandomNumber(22);
+            let num2 = generateRandomNumber(22 - num1);
             questions.push({ question: `${num1} + ${num2}`, answer: num1 + num2 });
         }
         for (let i = 0; i < 3; i++) {
-            let num1 = generateRandomNumber(25);
-            let num2 = generateRandomNumber(25);
-            questions.push({ question: `${num1} - ${num2}`, answer: num1 - num2 });
+            let num1 = generateRandomNumber(22);
+            let num2 = generateRandomNumber(num1);
+            questions.push({ question: `${num1} - ${num2}`, answer: Math.abs(num1 - num2) });
         }
         let numApples = generateRandomNumber(10) + 10;
-        let givenApples = generateRandomNumber(5) + 1;
+        let givenApples = generateRandomNumber(Math.min(10, numApples));
         questions.push({
             question: `לדנה היו ${numApples} תפוחים. היא נתנה ${givenApples} לחברתה. כמה נשארו לה?`,
-            answer: numApples - givenApples
+            answer: Math.abs(numApples - givenApples)
         });
         let numBalls = generateRandomNumber(10) + 1;
-        let extraBalls = generateRandomNumber(10) + 1;
+        let extraBalls = generateRandomNumber(10);
         questions.push({
             question: `ליוסי יש ${numBalls} כדורים. חברו נתן לו ${extraBalls} נוספים. כמה יש לו עכשיו?`,
             answer: numBalls + extraBalls
@@ -60,19 +61,28 @@ document.addEventListener("DOMContentLoaded", () => {
         checkBtn.addEventListener("click", () => {
             const answerInput = document.getElementById("answer");
             const feedbackEl = document.getElementById("feedback");
-            const userAnswer = parseInt(answerInput.value);
+            const userAnswer = Math.abs(parseInt(answerInput.value)); // Absolute value for answer
 
             if (userAnswer === currentQuestion.answer) {
                 feedbackEl.textContent = "✔ תשובה נכונה! כל הכבוד!";
                 feedbackEl.style.color = "green";
                 score++;
+                attempts = 0;
                 setTimeout(() => {
                     currentQuestionIndex++;
                     renderQuestion();
                 }, 1000);
             } else {
-                feedbackEl.textContent = "✖ תשובה שגויה, נסה שוב.";
+                feedbackEl.textContent = "✖ תשובה שגויה. נסה שוב.";
                 feedbackEl.style.color = "red";
+                attempts++;
+                if (attempts >= 2) {
+                    setTimeout(() => {
+                        attempts = 0;
+                        currentQuestionIndex++;
+                        renderQuestion();
+                    }, 1000);
+                }
             }
         });
     }
@@ -81,7 +91,25 @@ document.addEventListener("DOMContentLoaded", () => {
         root.innerHTML = `
             <div class="container">
                 <h1 class="title">סיכום התוצאות</h1>
-                <p class="summary">סיימת את המבחן! ענית נכון על ${score} מתוך ${questions.length} שאלות.</p>
+                <p class="summary">ענית נכון על ${score} מתוך ${questions.length} שאלות.</p>
+                <table class="summary-table">
+                    <thead>
+                        <tr>
+                            <th>שאלה</th>
+                            <th>תשובה שלך</th>
+                            <th>נכון/שגוי</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${questions.map((q, i) => `
+                            <tr>
+                                <td>${q.question}</td>
+                                <td>${answers[i]?.userAnswer || "לא ענה"}</td>
+                                <td>${answers[i]?.isCorrect ? "✔" : "✖"}</td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
                 <button id="restart-btn" class="btn">התחל מחדש</button>
             </div>
         `;
@@ -90,6 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
         restartBtn.addEventListener("click", () => {
             currentQuestionIndex = 0;
             score = 0;
+            attempts = 0;
             renderQuestion();
         });
     }
