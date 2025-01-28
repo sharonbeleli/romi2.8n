@@ -65,8 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <h1 class="title">אפליקציית תרגילי חשבון</h1>
                 <div class="card">
                     <h2 class="question">${currentQuestion.question}</h2>
-                    <input type="number" id="answer" class="input" placeholder="הקלד תשובה כאן">
-                     inputMode="numeric"
+                    <input type="number" id="answer" class="input" placeholder="הקלד תשובה כאן" inputMode="numeric" pattern="[0-9]*">
                     <button id="check-btn" class="btn">בדוק תשובה</button>
                     <p id="feedback" class="feedback"></p>
                 </div>
