@@ -13,30 +13,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function generateQuestions() {
-        const questions = [];
-        for (let i = 0; i < 3; i++) {
-            let num1 = generateRandomNumber(22);
-            let num2 = generateRandomNumber(22 - num1);
-            questions.push({ question: `${num1} + ${num2}`, answer: num1 + num2 });
+        const questions = new Set();
+        while (questions.size < 10) {
+            const num1 = generateRandomNumber(22);
+            const num2 = generateRandomNumber(22 - num1);
+
+            const operation = Math.random() < 0.5 ? "+" : "-";
+            const answer = operation === "+" ? num1 + num2 : Math.abs(num1 - num2);
+
+            const questionText = operation === "+"
+                ? `${num1} + ${num2}`
+                : `${num1} - ${num2}`;
+
+            questions.add(JSON.stringify({ question: questionText, answer }));
         }
-        for (let i = 0; i < 3; i++) {
-            let num1 = generateRandomNumber(22);
-            let num2 = generateRandomNumber(num1);
-            questions.push({ question: `${num1} - ${num2}`, answer: Math.abs(num1 - num2) });
-        }
-        let numApples = generateRandomNumber(10) + 10;
-        let givenApples = generateRandomNumber(Math.min(10, numApples));
-        questions.push({
-            question: `לדנה היו ${numApples} תפוחים. היא נתנה ${givenApples} לחברתה. כמה נשארו לה?`,
-            answer: Math.abs(numApples - givenApples)
-        });
-        let numBalls = generateRandomNumber(10) + 1;
-        let extraBalls = generateRandomNumber(10);
-        questions.push({
-            question: `ליוסי יש ${numBalls} כדורים. חברו נתן לו ${extraBalls} נוספים. כמה יש לו עכשיו?`,
-            answer: numBalls + extraBalls
-        });
-        return questions.slice(0, 10);
+
+        return Array.from(questions).map((q) => JSON.parse(q));
     }
 
     function renderQuestion() {
