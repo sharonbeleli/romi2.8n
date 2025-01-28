@@ -1,0 +1,85 @@
+
+document.addEventListener("DOMContentLoaded", () => {
+    const root = document.getElementById("root");
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    const questions = generateQuestions();
+    renderQuestion();
+
+    function generateRandomNumber(max) {
+        return Math.floor(Math.random() * (max + 1));
+    }
+
+    function generateQuestions() {
+        const questions = [];
+        for (let i = 0; i < 3; i++) {
+            let num1 = generateRandomNumber(25);
+            let num2 = generateRandomNumber(25);
+            questions.push({ question: `${num1} + ${num2}`, answer: num1 + num2 });
+        }
+        for (let i = 0; i < 3; i++) {
+            let num1 = generateRandomNumber(25);
+            let num2 = generateRandomNumber(25);
+            questions.push({ question: `${num1} - ${num2}`, answer: num1 - num2 });
+        }
+        return questions.slice(0, 10);
+    }
+
+    function renderQuestion() {
+        if (currentQuestionIndex >= questions.length) {
+            renderSummary();
+            return;
+        }
+
+        const currentQuestion = questions[currentQuestionIndex];
+        root.innerHTML = `
+            <div class="container">
+                <h1 class="title">אפליקציית תרגילי חשבון</h1>
+                <div class="card">
+                    <h2 class="question">${currentQuestion.question}</h2>
+                    <input type="number" id="answer" class="input" placeholder="הקלד תשובה כאן">
+                    <button id="check-btn" class="btn">בדוק תשובה</button>
+                    <p id="feedback" class="feedback"></p>
+                </div>
+            </div>
+        `;
+
+        const checkBtn = document.getElementById("check-btn");
+        checkBtn.addEventListener("click", () => {
+            const answerInput = document.getElementById("answer");
+            const feedbackEl = document.getElementById("feedback");
+            const userAnswer = parseInt(answerInput.value);
+
+            if (userAnswer === currentQuestion.answer) {
+                feedbackEl.textContent = "✔ תשובה נכונה! כל הכבוד!";
+                feedbackEl.style.color = "green";
+                score++;
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    renderQuestion();
+                }, 1000);
+            } else {
+                feedbackEl.textContent = "✖ תשובה שגויה, נסה שוב.";
+                feedbackEl.style.color = "red";
+            }
+        });
+    }
+
+    function renderSummary() {
+        root.innerHTML = `
+            <div class="container">
+                <h1 class="title">סיכום התוצאות</h1>
+                <p class="summary">סיימת את המבחן! ענית נכון על ${score} מתוך ${questions.length} שאלות.</p>
+                <button id="restart-btn" class="btn">התחל מחדש</button>
+            </div>
+        `;
+
+        const restartBtn = document.getElementById("restart-btn");
+        restartBtn.addEventListener("click", () => {
+            currentQuestionIndex = 0;
+            score = 0;
+            renderQuestion();
+        });
+    }
+});
