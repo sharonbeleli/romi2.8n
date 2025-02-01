@@ -59,6 +59,26 @@ body {
   font-weight: bold;
 }
 
+/* כפתורי בחירה (למבחן אמריקאי) */
+.choices-container {
+  margin: 15px 0;
+}
+.choice-btn {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  font-size: 1.2rem;
+  color: #fff;
+  background: #28a745;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.choice-btn:hover {
+  background: #218838;
+}
+
 /* טבלת סיכום */
 .summary-table {
   width: 100%;
@@ -173,7 +193,7 @@ body {
   margin: 5px;
   transition: transform 0.5s ease, opacity 0.5s ease;
 }
-/* אנימציה להסרת תפוח – דוגמת "סימון X" */
+/* אנימציה להסרת תפוח – סימן "X" */
 .remove-apple {
   animation: removeApple 0.5s forwards;
 }
