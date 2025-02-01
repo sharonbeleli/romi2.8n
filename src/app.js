@@ -1,12 +1,53 @@
 document.addEventListener("DOMContentLoaded", () => {
   const root = document.getElementById("root");
+
+  // משתנים גלובליים
+  let userName = "";
   let currentQuestionIndex = 0;
   let score = 0;
   let attempts = 0;
   const answers = [];
+  let questions = [];
 
-  const questions = generateQuestions();
-  renderQuestion();
+  // קטעי סאונד (וודאו שהקבצים קיימים בתיקייה)
+  const correctSound = new Audio("src/sounds/correct.mp3");
+  const wrongSound = new Audio("src/sounds/wrong.mp3");
+  const clickSound = new Audio("src/sounds/click.mp3");
+
+  // הצגת מסך פתיחה – הכנס את השם
+  renderNameInput();
+
+  function renderNameInput() {
+    root.innerHTML = `
+      <div class="container fade-in">
+        <h1 class="title">ברוכים הבאים לתרגילי חשבון</h1>
+        <p>אנא הכנס את שמך כדי להתחיל:</p>
+        <input type="text" id="child-name" class="input" placeholder="שם הילד" />
+        <button id="start-btn" class="btn">התחל</button>
+      </div>
+    `;
+    const startBtn = document.getElementById("start-btn");
+    startBtn.addEventListener("click", () => {
+      const nameInput = document.getElementById("child-name");
+      const name = nameInput.value.trim();
+      if (name === "") {
+        alert("אנא הכנס שם");
+        return;
+      }
+      userName = name;
+      clickSound.play();
+      initQuiz();
+    });
+  }
+
+  function initQuiz() {
+    currentQuestionIndex = 0;
+    score = 0;
+    attempts = 0;
+    answers.length = 0;
+    questions = generateQuestions();
+    renderQuestion();
+  }
 
   function generateRandomNumber(max) {
     return Math.floor(Math.random() * (max + 1));
@@ -15,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function generateQuestions() {
     const questionsSet = new Set();
 
-    // יצירת שאלות חיבור וחיסור
+    // יצירת שאלות חיבור וחיסור (6 שאלות מספריות בסיסיות)
     while (questionsSet.size < 6) {
       const num1 = generateRandomNumber(22);
       const num2 = generateRandomNumber(22 - num1);
@@ -29,26 +70,26 @@ document.addEventListener("DOMContentLoaded", () => {
     while (questionsSet.size < 10) {
       const type = Math.random() < 0.5 ? "apples" : "balls";
       if (type === "apples") {
-        const numApples = generateRandomNumber(10) + 10;
-        const givenApples = generateRandomNumber(Math.min(10, numApples));
+        // בעיית תפוחים – חיסור: לדנה היו X תפוחים, נתנה Y, כמה נשארו?
+        const total = generateRandomNumber(10) + 10;
+        const given = generateRandomNumber(Math.min(10, total));
         questionsSet.add(JSON.stringify({
-          question: `לדנה היו ${numApples} תפוחים. היא נתנה ${givenApples} לחברתה. כמה נשארו לה?`,
-          answer: Math.abs(numApples - givenApples),
+          question: `לדנה היו ${total} תפוחים. היא נתנה ${given} לחברתה. כמה נשארו לה?`,
+          answer: total - given,
           type: "apples",
-          total: numApples,
-          given: givenApples,
-          remaining: Math.abs(numApples - givenApples)
+          total, 
+          given
         }));
       } else {
-        const numBalls = generateRandomNumber(10) + 1;
-        const extraBalls = generateRandomNumber(10);
+        // בעיית כדורים – חיבור: ליוסי יש X כדורים, חברו נתן לו Y, כמה יש לו עכשיו?
+        const initial = generateRandomNumber(10) + 1;
+        const added = generateRandomNumber(10);
         questionsSet.add(JSON.stringify({
-          question: `ליוסי יש ${numBalls} כדורים. חברו נתן לו ${extraBalls} נוספים. כמה יש לו עכשיו?`,
-          answer: numBalls + extraBalls,
+          question: `ליוסי יש ${initial} כדורים. חברו נתן לו ${added} נוספים. כמה יש לו עכשיו?`,
+          answer: initial + added,
           type: "balls",
-          initial: numBalls,
-          added: extraBalls,
-          final: numBalls + extraBalls
+          initial,
+          added
         }));
       }
     }
@@ -65,11 +106,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentQuestion = questions[currentQuestionIndex];
     root.innerHTML = `
       <div class="container fade-in">
-        <h1 class="title">אפליקציית תרגילי חשבון</h1>
+        <h1 class="title">תרגילי חשבון</h1>
         ${renderProgressBar()}
         <div class="card">
           <h2 class="question">${currentQuestion.question}</h2>
-          <!-- כאן נוסף קונטיינר להצגת האנימציה של הבעיה -->
+          <!-- קונטיינר להצגת האנימציה לבעיות מילוליות -->
           <div id="animation-container"></div>
           <input type="number" id="answer" class="input" placeholder="הקלד תשובה כאן" inputmode="numeric" pattern="[0-9]*">
           <button id="check-btn" class="btn">בדוק תשובה</button>
@@ -78,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
 
-    // במידה ומדובר בבעיה מילולית, מפעילים אנימציה מתאימה
+    // במידה וזו בעיה מילולית – מפעילים אנימציה מתאימה
     if (currentQuestion.type) {
       animateWordProblem(currentQuestion);
     }
@@ -90,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const answerInput = document.getElementById("answer");
       const feedbackEl = document.getElementById("feedback");
       const userAnswer = parseInt(answerInput.value);
-
+      
       if (isNaN(userAnswer)) {
         feedbackEl.textContent = "נא להקליד מספר.";
         feedbackEl.style.color = "orange";
@@ -100,9 +141,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const card = document.querySelector(".card");
 
       if (userAnswer === currentQuestion.answer) {
-        feedbackEl.textContent = "✔ תשובה נכונה! כל הכבוד!";
+        feedbackEl.textContent = `${userName}, תשובה נכונה! כל הכבוד!`;
         feedbackEl.style.color = "green";
-        score++;
+        correctSound.play();
         answers.push({ question: currentQuestion.question, userAnswer, isCorrect: true });
         attempts = 0;
         launchConfetti();
@@ -112,8 +153,9 @@ document.addEventListener("DOMContentLoaded", () => {
           renderQuestion();
         }, 500);
       } else {
-        feedbackEl.textContent = "✖ תשובה שגויה. נסה שוב.";
+        feedbackEl.textContent = `${userName}, תשובה שגויה. נסה שוב.`;
         feedbackEl.style.color = "red";
+        wrongSound.play();
         attempts++;
         card.classList.add("shake");
         setTimeout(() => card.classList.remove("shake"), 500);
@@ -135,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
     root.innerHTML = `
       <div class="container fade-in">
         <h1 class="title">סיכום התוצאות</h1>
-        <p class="summary">ענית נכון על ${score} מתוך ${questions.length} שאלות.</p>
+        <p class="summary">${userName}, ענית נכון על ${score} מתוך ${questions.length} שאלות.</p>
         <table class="summary-table">
           <thead>
             <tr>
@@ -160,11 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const restartBtn = document.getElementById("restart-btn");
     restartBtn.addEventListener("click", () => {
-      currentQuestionIndex = 0;
-      score = 0;
-      attempts = 0;
-      answers.length = 0;
-      renderQuestion();
+      initQuiz();
     });
   }
 
@@ -183,7 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // אנימציה לתשובה נכונה
+  // אפקט קונפטי לתשובות נכונות
   function launchConfetti() {
     const confettiCount = 30;
     for (let i = 0; i < confettiCount; i++) {
@@ -202,7 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return colors[Math.floor(Math.random() * colors.length)];
   }
 
-  // הפעלת אנימציה עבור בעיות מילוליות
+  // הפעלת אנימציה לבעיות מילוליות – הפנייה לפונקציות לפי סוג
   function animateWordProblem(question) {
     if (question.type === "apples") {
       animateApples(question.total, question.given);
@@ -211,74 +249,92 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // אנימציה לבעיית תפוחים: מציג שתי קבוצות – "לדנה" ו"לחברתה" – כאשר לאחר השהייה, כמה תפוחים "מעוברים"
+  // אנימציה לבעיית תפוחים (חיסור):
+  // מוצגים שני חלקים: "בהתחלה" עם כל התפוחים, וסימן ❌ המפריד ובו מוצגים מה שנשאר לאחר הסרת התפוחים (total - given)
   function animateApples(total, given) {
     const container = document.getElementById("animation-container");
     container.innerHTML = `
-      <div class="apples-container">
-        <div class="apples-group">
-          <div class="group-label">לדנה</div>
-          <div id="apples-start" class="group-apples"></div>
+      <div class="apples-animation">
+        <div class="apples-initial">
+          <div class="group-label">בהתחלה</div>
+          <div id="apples-initial" class="group-apples"></div>
         </div>
-        <div class="apples-group">
-          <div class="group-label">לחברתה</div>
-          <div id="apples-end" class="group-apples"></div>
+        <div class="separator separator-sub">❌</div>
+        <div class="apples-remaining">
+          <div class="group-label">נותרו</div>
+          <div id="apples-remaining" class="group-apples"></div>
         </div>
       </div>
     `;
-    const startDiv = container.querySelector("#apples-start");
-    const endDiv = container.querySelector("#apples-end");
+    const initialDiv = container.querySelector("#apples-initial");
+    const remainingDiv = container.querySelector("#apples-remaining");
 
     // מציגים את כל התפוחים בהתחלה
     for (let i = 0; i < total; i++) {
       const appleSpan = document.createElement("span");
       appleSpan.classList.add("apple");
       appleSpan.textContent = "🍎";
-      startDiv.appendChild(appleSpan);
+      initialDiv.appendChild(appleSpan);
     }
 
-    // לאחר השהייה, מעבירים את מספר התפוחים הנתון
+    // לאחר השהייה – מסמנים את מספר התפוחים שיש להסיר (given) עם אנימציית הסרה, ומיד לאחר מכן מציגים את התפוחים שנותרו
     setTimeout(() => {
       for (let i = 0; i < given; i++) {
-        const apple = startDiv.lastElementChild;
+        const apple = initialDiv.lastElementChild;
         if (apple) {
-          apple.classList.add("move-apple");
-          apple.addEventListener("transitionend", () => {
-            apple.classList.remove("move-apple");
-            apple.classList.add("fade-in-apple");
-            endDiv.insertBefore(apple, endDiv.firstChild);
+          apple.classList.add("remove-apple");
+          apple.addEventListener("animationend", () => {
+            apple.remove();
+            // לאחר הסרת כל התפוחים הנדרשים, מעדכנים את ה"נותרו" (אם לא נעשה כבר)
+            remainingDiv.innerHTML = "";
+            const remainingCount = total - given;
+            for (let j = 0; j < remainingCount; j++) {
+              const remApple = document.createElement("span");
+              remApple.classList.add("apple");
+              remApple.textContent = "🍎";
+              remainingDiv.appendChild(remApple);
+            }
           }, { once: true });
         }
       }
     }, 1000);
   }
 
-  // אנימציה לבעיית כדורים: מציגים את הכדורים ההתחלתיים ולאחר מכן מוסיפים את החדשים עם אפקט fade-in
+  // אנימציה לבעיית כדורים (חיבור):
+  // מוצגים שני חלקים: "בהתחלה" עם הכדורים ההתחלתיים, וביניהם סימן + שמפריד והצגה של הכדורים שנוספו.
   function animateBalls(initial, added) {
     const container = document.getElementById("animation-container");
     container.innerHTML = `
-      <div class="balls-container">
-        <div class="balls-group">
-          <div class="group-label">התחלתית</div>
-          <div id="balls-start" class="group-balls"></div>
+      <div class="balls-animation">
+        <div class="balls-initial">
+          <div class="group-label">בהתחלה</div>
+          <div id="balls-initial" class="group-balls"></div>
+        </div>
+        <div class="separator separator-add">+</div>
+        <div class="balls-added">
+          <div class="group-label">נוספו</div>
+          <div id="balls-added" class="group-balls"></div>
         </div>
       </div>
     `;
-    const startDiv = container.querySelector("#balls-start");
+    const initialDiv = container.querySelector("#balls-initial");
+    const addedDiv = container.querySelector("#balls-added");
 
+    // מציגים את הכדורים ההתחלתיים
     for (let i = 0; i < initial; i++) {
       const ballSpan = document.createElement("span");
       ballSpan.classList.add("ball");
       ballSpan.textContent = "⚽";
-      startDiv.appendChild(ballSpan);
+      initialDiv.appendChild(ballSpan);
     }
 
+    // לאחר השהייה – מוסיפים את הכדורים שנוספו עם אפקט fade-in
     setTimeout(() => {
       for (let i = 0; i < added; i++) {
         const ballSpan = document.createElement("span");
         ballSpan.classList.add("ball", "fade-in-ball");
         ballSpan.textContent = "⚽";
-        startDiv.appendChild(ballSpan);
+        addedDiv.appendChild(ballSpan);
       }
     }, 1000);
   }
