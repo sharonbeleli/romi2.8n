@@ -12,7 +12,7 @@ body {
   padding: 20px;
 }
 
-/* כותרות וכרטיס השאלה */
+/* כותרות וכרטיסים */
 .title {
   font-size: 2.5rem;
   color: #fff;
@@ -65,7 +65,8 @@ body {
   border-collapse: collapse;
   margin: 20px auto;
 }
-.summary-table th, .summary-table td {
+.summary-table th, 
+.summary-table td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: center;
@@ -140,47 +141,45 @@ body {
   100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
 }
 
-/* אנימציות לבעיות מילוליות */
+/* אנימציות לתרגילים מילוליים */
 
-/* עיצוב לקבוצות אנימציה (תפוחים/כדורים) */
-.apples-container,
-.balls-container {
+/* מכולות לאנימציה – תפוחים וכדורים */
+.apples-animation, 
+.balls-animation {
   display: flex;
+  align-items: center;
   justify-content: center;
   margin: 20px 0;
 }
-.apples-group,
-.balls-group {
-  margin: 0 20px;
-  text-align: center;
+.apples-animation > div,
+.balls-animation > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .group-label {
   font-size: 1.2rem;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
-.group-apples,
+.group-apples, 
 .group-balls {
   min-height: 50px;
 }
 
-/* עיצוב לתפוחים */
+/* עיצוב לאלמנטים – תפוחים */
 .apple {
   font-size: 2rem;
   display: inline-block;
   margin: 5px;
-  transition: transform 1s ease, opacity 1s ease;
+  transition: transform 0.5s ease, opacity 0.5s ease;
 }
-.move-apple {
-  transform: translateY(50px);
-  opacity: 0;
+/* אנימציה להסרת תפוח – דוגמת "סימון X" */
+.remove-apple {
+  animation: removeApple 0.5s forwards;
 }
-.fade-in-apple {
-  opacity: 0;
-  animation: fadeInApple 1s forwards;
-}
-@keyframes fadeInApple {
-  from { opacity: 0; }
-  to { opacity: 1; }
+@keyframes removeApple {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-20px); }
 }
 
 /* עיצוב לכדורים */
@@ -196,4 +195,18 @@ body {
 @keyframes fadeInBall {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* עיצוב להפרדות – סימן בין קבוצות */
+.separator {
+  font-size: 2rem;
+  margin: 0 10px;
+  display: flex;
+  align-items: center;
+}
+.separator-sub {
+  color: red;
+}
+.separator-add {
+  color: green;
 }
